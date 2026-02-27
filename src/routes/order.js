@@ -47,24 +47,22 @@ router.post('/', validateToken, async (req, res) => {
   const emailResult  = results[0];
   const sheetsResult = results[1];
 
-  if (emailResult.status === 'rejected') {
-    console.error('❌ Email failed:', emailResult.reason?.message);
-  } else {
-    console.log('✅ Email sent');
-  }
+  const emailOk  = emailResult.status  === 'fulfilled';
+  const sheetsOk = sheetsResult.status === 'fulfilled';
 
-  if (sheetsResult.status === 'rejected') {
-    console.error('❌ Sheets logging failed:', sheetsResult.reason?.message);
-  } else {
-    console.log('✅ Sheet updated');
-  }
+  if (!emailOk)  console.error('❌ Email failed:',  emailResult.reason?.message);
+  else           console.log('✅ Email sent');
 
-  // Return success even if one service had an issue — order is received
+  if (!sheetsOk) console.error('❌ Sheets failed:', sheetsResult.reason?.message);
+  else           console.log('✅ Sheet updated');
+
+  // Always return 200 if order was at least received
+  // Frontend success screen should show regardless of email/sheets status
   return res.status(200).json({
     success: true,
     orderId,
-    email:  emailResult.status  === 'fulfilled' ? 'sent'   : 'failed',
-    sheets: sheetsResult.status === 'fulfilled' ? 'logged' : 'failed'
+    email:  emailOk  ? 'sent'   : 'failed',
+    sheets: sheetsOk ? 'logged' : 'failed'
   });
 });
 
