@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Beyond Desserts — Order Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d0a0f;
+    --surface: #17101a;
+    --card: #1f1524;
+    --border: #2d1f35;
+    --accent: #e86fa0;
+    --accent2: #9b3fbf;
+    --text: #f5eef8;
+    --muted: #8a7092;
+    --success: #4caf7d;
+    --danger: #e05050;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    position: relative;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px 80px;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,111,160,.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(155,63,191,.15) 0%, transparent 60%);
+  }
+  .hero-tag {
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px; opacity: .9;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 900; line-height: 1;
+    background: linear-gradient(135deg, #f5d0e8 0%, var(--accent) 55%, var(--accent2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 14px;
+  }
+  header p { font-size: 1rem; color: var(--muted); max-width: 380px; line-height: 1.6; }
+
+  .cart-btn {
+    position: fixed; top: 18px; right: 18px;
+    background: var(--accent); color: #111;
+    border: none; border-radius: 50px; padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .88rem;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    z-index: 999; box-shadow: 0 4px 20px rgba(232,160,32,.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(232,160,32,.5); }
+  .cart-count {
+    background: #111; color: var(--accent); border-radius: 50%;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 700;
+  }
+
+  .nav-tabs {
+    display: flex; gap: 6px; justify-content: center;
+    flex-wrap: wrap; padding: 0 16px 28px;
+  }
+  .nav-tab {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 7px 18px; border-radius: 50px;
+    font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .2s;
+  }
+  .nav-tab:hover, .nav-tab.active {
+    background: var(--accent); color: #111; border-color: var(--accent);
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 120px; }
+  .section-label {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+    color: var(--text); margin: 36px 0 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .menu-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+    transition: transform .22s, box-shadow .22s, border-color .22s;
+    position: relative;
+  }
+  .menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    border-color: var(--accent);
+  }
+  .menu-card .img-wrap {
+    width: 100%; height: 170px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; position: relative; overflow: hidden;
+  }
+  .menu-card .img-wrap::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,.5));
+  }
+  .badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--accent2); color: #fff;
+    font-size: .65rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 50px; z-index: 1;
+  }
+  .menu-card .info { padding: 14px 16px 16px; }
+  .menu-card h3 { font-size: .98rem; font-weight: 600; margin-bottom: 4px; }
+  .menu-card p { font-size: .78rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+  .menu-card .row { display: flex; align-items: center; justify-content: space-between; }
+  .price { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+  .add-btn {
+    background: var(--accent); color: #111; border: none; border-radius: 50px;
+    width: 32px; height: 32px; font-size: 1.3rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, background .15s;
+  }
+  .add-btn:hover { transform: scale(1.15); background: #f0a0c0; }
+  .qty-control { display: flex; align-items: center; gap: 6px; }
+  .qty-control button {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); width: 28px; height: 28px; border-radius: 50%;
+    font-size: .95rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .qty-control button:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+  .qty-control span { font-size: .9rem; font-weight: 600; min-width: 18px; text-align: center; }
+
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.65); z-index: 1000; backdrop-filter: blur(4px);
+  }
+  .overlay.open { display: block; }
+  .cart-panel {
+    position: fixed; top: 0; right: -480px;
+    width: min(480px, 100vw); height: 100%;
+    background: var(--surface); border-left: 1px solid var(--border);
+    z-index: 1001; display: flex; flex-direction: column;
+    transition: right .35s cubic-bezier(.4,0,.2,1); overflow: hidden;
+  }
+  .cart-panel.open { right: 0; }
+  .cart-header {
+    padding: 22px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cart-header h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; }
+  .close-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .cart-items { flex: 1; overflow-y: auto; padding: 16px 24px; }
+  .cart-item {
+    display: flex; gap: 12px; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .cart-item-emoji { font-size: 2rem; width: 44px; text-align: center; }
+  .cart-item-info { flex: 1; }
+  .cart-item-info h4 { font-size: .9rem; font-weight: 600; }
+  .cart-item-info span { font-size: .78rem; color: var(--muted); }
+  .cart-item-price { font-size: .95rem; font-weight: 700; color: var(--accent); min-width: 60px; text-align: right; }
+  .remove-item {
+    background: none; border: none; color: var(--danger);
+    cursor: pointer; font-size: 1rem; padding: 4px;
+    opacity: .6; transition: opacity .15s;
+  }
+  .remove-item:hover { opacity: 1; }
+  .empty-cart { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-cart .icon { font-size: 3rem; margin-bottom: 12px; }
+  .cart-footer { padding: 20px 24px; border-top: 1px solid var(--border); }
+  .subtotal-row {
+    display: flex; justify-content: space-between;
+    margin-bottom: 16px; font-weight: 600; font-size: 1rem;
+  }
+  .checkout-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff; border: none; border-radius: 12px; padding: 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: opacity .2s, transform .2s;
+  }
+  .checkout-btn:hover { opacity: .92; transform: translateY(-1px); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.75); z-index: 2000;
+    align-items: flex-start; justify-content: center;
+    overflow-y: auto; padding: 30px 12px;
+    backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; width: 100%; max-width: 540px; padding: 32px;
+    position: relative; animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 6px; }
+  .modal .subtitle { color: var(--muted); font-size: .85rem; margin-bottom: 24px; }
+  .step-indicator { display: flex; gap: 8px; margin-bottom: 28px; }
+  .step-dot { flex: 1; height: 4px; background: var(--border); border-radius: 4px; transition: background .3s; }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--success); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: .8rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: .9rem;
+    outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .payment-option {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 12px;
+    cursor: pointer; text-align: center; transition: all .2s;
+  }
+  .payment-option:hover { border-color: var(--accent); }
+  .payment-option.selected { border-color: var(--accent); background: rgba(232,160,32,.08); }
+  .payment-option .pay-icon { font-size: 1.6rem; margin-bottom: 4px; }
+  .payment-option .pay-name { font-size: .82rem; font-weight: 600; }
+  .payment-option .pay-desc { font-size: .7rem; color: var(--muted); }
+
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 28px; text-align: center; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .upload-zone:hover, .upload-zone.has-file {
+    border-color: var(--accent); background: rgba(232,160,32,.04);
+  }
+  .upload-zone .up-icon { font-size: 2rem; margin-bottom: 8px; }
+  .upload-zone p { font-size: .82rem; color: var(--muted); }
+  .upload-zone p strong { color: var(--accent); }
+  .upload-zone input { display: none; }
+  .file-preview { margin-top: 10px; font-size: .8rem; color: var(--success); }
+
+  .order-summary-list { margin-bottom: 18px; }
+  .sum-item {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; font-size: .88rem; border-bottom: 1px solid var(--border);
+  }
+  .sum-item:last-child { border-bottom: none; }
+  .sum-total {
+    display: flex; justify-content: space-between;
+    font-size: 1.05rem; font-weight: 700; margin-top: 10px; color: var(--accent);
+  }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-back {
+    flex: 1; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); border-radius: 10px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 600;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn-back:hover { background: var(--border); }
+  .btn-next {
+    flex: 2;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff; border: none; border-radius: 10px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 700;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn-next:hover { opacity: .9; }
+  .btn-next:disabled { opacity: .45; cursor: not-allowed; }
+
+  .success-screen { text-align: center; padding: 10px 0 20px; }
+  .success-icon { font-size: 4rem; margin-bottom: 16px; animation: pop .4s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 8px; }
+  .success-screen p { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+  .order-id {
+    display: inline-block; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 18px; font-size: .82rem;
+    color: var(--accent); font-weight: 700; letter-spacing: .05em; margin: 14px 0;
+  }
+
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card); border: 1px solid var(--accent);
+    color: var(--text); padding: 12px 22px;
+    border-radius: 50px; font-size: .85rem; font-weight: 500;
+    z-index: 9999; transition: transform .3s; white-space: nowrap;
+    box-shadow: 0 6px 30px rgba(0,0,0,.5);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  @media(max-width: 500px) {
+    .modal { padding: 22px 16px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button class="cart-btn" onclick="toggleCart()">
+  🛒 Cart <span class="cart-count" id="cartCount">0</span>
+</button>
+
+<header>
+  <div class="hero-tag">🍫 Handcrafted. Sweet. Delivered.</div>
+  <h1>Beyond Desserts</h1>
+  <p>Indulge in our handcrafted cookies, chocolates, and sweet treats. Delivered fresh to your door.</p>
+</header>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" onclick="filterMenu('all', this)">All</button>
+  <button class="nav-tab" onclick="filterMenu('cookies', this)">Cookies</button>
+  <button class="nav-tab" onclick="filterMenu('chocolates', this)">Chocolates</button>
+  <button class="nav-tab" onclick="filterMenu('cakes', this)">Cakes & Bars</button>
+  <button class="nav-tab" onclick="filterMenu('drinks', this)">Sweet Drinks</button>
+</div>
+
+<main id="menuContainer"></main>
+
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h2>Your Order</h2>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="subtotal-row">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">₱0.00</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot" id="dot4"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <h2>Your Details</h2>
+      <p class="subtitle">Step 1 of 3 — Tell us where to deliver</p>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="custName" placeholder="Juan dela Cruz" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="custPhone" placeholder="09XX XXX XXXX" />
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="custEmail" placeholder="juan@email.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Delivery Address *</label>
+        <textarea id="custAddress" placeholder="House No., Street, Barangay, City..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Order Notes (optional)</label>
+        <input type="text" id="custNotes" placeholder="e.g. Less spicy, extra rice, etc." />
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="closeCheckout()">Cancel</button>
+        <button class="btn-next" onclick="goStep(2)">Next: Payment →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <h2>Payment Method</h2>
+      <p class="subtitle">Step 2 of 3 — Choose how to pay</p>
+      <div class="payment-options">
+        <div class="payment-option" id="pay-gcash" onclick="selectPayment('GCash')">
+          <div class="pay-icon">💙</div>
+          <div class="pay-name">GCash</div>
+          <div class="pay-desc">Send via GCash app</div>
+        </div>
+        <div class="payment-option" id="pay-maya" onclick="selectPayment('Maya')">
+          <div class="pay-icon">🟢</div>
+          <div class="pay-name">Maya</div>
+          <div class="pay-desc">Send via Maya app</div>
+        </div>
+        <div class="payment-option" id="pay-bank" onclick="selectPayment('Bank Transfer')">
+          <div class="pay-icon">🏦</div>
+          <div class="pay-name">Bank Transfer</div>
+          <div class="pay-desc">BDO / BPI / UnionBank</div>
+        </div>
+        <div class="payment-option" id="pay-cod" onclick="selectPayment('Cash on Delivery')">
+          <div class="pay-icon">💵</div>
+          <div class="pay-name">Cash on Delivery</div>
+          <div class="pay-desc">Pay upon delivery</div>
+        </div>
+      </div>
+      <div id="paymentInfo" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;font-size:.85rem;line-height:1.7;">
+        <strong style="color:var(--accent);">📋 Payment Instructions</strong><br/>
+        <span id="payInstructions"></span>
+      </div>
+      <div id="screenshotSection" style="display:none;">
+        <div class="form-group">
+          <label>Upload Payment Screenshot *</label>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('screenshotFile').click()">
+            <div class="up-icon">📸</div>
+            <p>Click to upload your payment screenshot<br/><strong>JPG, PNG, or PDF</strong></p>
+            <input type="file" id="screenshotFile" accept="image/*,.pdf" onchange="handleFileUpload(this)" />
+          </div>
+          <div class="file-preview" id="filePreview"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(1)">← Back</button>
+        <button class="btn-next" id="payNextBtn" onclick="goStep(3)" disabled>Review Order →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <h2>Review Order</h2>
+      <p class="subtitle">Step 3 of 3 — Confirm your order details</p>
+      <div class="order-summary-list" id="reviewItems"></div>
+      <div class="sum-total"><span>Total</span><span id="reviewTotal">₱0.00</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;font-size:.84rem;line-height:1.8;">
+        <div id="reviewInfo"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(2)">← Back</button>
+        <button class="btn-next" id="submitBtn" onclick="submitOrder()">✅ Place Order</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h2>Order Placed!</h2>
+        <p>Thank you! We've received your order and will confirm shortly.</p>
+        <div class="order-id" id="orderIdDisplay"></div>
+        <p>A notification has been sent to the restaurant. You'll be contacted soon.</p>
+        <div class="btn-row" style="margin-top:28px;">
+          <button class="btn-next" onclick="closeSuccess()">Back to Menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+//  CONFIGURATION
+//  Only the backend URL and token live here.
+//  All secrets (email, GCash, API keys) are on the server.
+// ─────────────────────────────────────────────────────────────────
+const CONFIG = {
+  restaurantName: "Beyond Desserts",
+  backendUrl:     "https://beyond-desserts-backend.onrender.com",  // ← Your Render.com URL
+  apiToken:       "replace-with-your-token",                        // ← Must match .env API_SECRET_TOKEN
+
+  // These are shown to customers in the UI (not secret — customers need to know where to send money)
+  gcashNumber:  "09XX-XXX-XXXX",
+  mayaNumber:   "09XX-XXX-XXXX",
+  bankDetails:  "BDO • Account: 0000-0000-0000 • Name: Your Name"
+};
+
+// ─────────────────────────────────────────────────────────────────
+//  MENU DATA
+// ─────────────────────────────────────────────────────────────────
+const MENU = [
+  // COOKIES
+  { id:1,  name:"Classic Choco Chip Cookie",   cat:"cookies",    price:65,  emoji:"🍪", badge:"Bestseller", desc:"Thick, chewy cookies loaded with semi-sweet chocolate chips. 3 pcs per order." },
+  { id:2,  name:"Double Dutch Cookie",         cat:"cookies",    price:75,  emoji:"🍪", badge:null,         desc:"Rich cocoa cookie with white and dark chocolate chips. 3 pcs per order." },
+  { id:3,  name:"Crinkle Cookies",             cat:"cookies",    price:70,  emoji:"🍪", badge:"Popular",    desc:"Soft fudgy chocolate crinkles dusted in powdered sugar. 4 pcs per order." },
+  { id:4,  name:"Oatmeal Raisin Cookie",       cat:"cookies",    price:65,  emoji:"🍪", badge:null,         desc:"Soft-baked oatmeal cookies with plump raisins and a hint of cinnamon. 3 pcs." },
+  { id:5,  name:"Red Velvet Cookie",           cat:"cookies",    price:80,  emoji:"🍪", badge:"New",        desc:"Vibrant red velvet cookies with cream cheese chips. 3 pcs per order." },
+
+  // CHOCOLATES
+  { id:6,  name:"Dark Chocolate Bark",         cat:"chocolates", price:120, emoji:"🍫", badge:"Bestseller", desc:"Premium dark chocolate bark topped with sea salt and roasted almonds." },
+  { id:7,  name:"Milk Chocolate Truffles",     cat:"chocolates", price:150, emoji:"🍫", badge:null,         desc:"Velvety smooth milk chocolate truffles dusted with cocoa powder. 6 pcs." },
+  { id:8,  name:"White Choco Strawberry Bar",  cat:"chocolates", price:135, emoji:"🍫", badge:"Popular",    desc:"Creamy white chocolate bar swirled with freeze-dried strawberry pieces." },
+  { id:9,  name:"Hazelnut Chocolate Bonbons",  cat:"chocolates", price:160, emoji:"🍫", badge:null,         desc:"Crunchy hazelnut center wrapped in smooth dark chocolate. 6 pcs per box." },
+
+  // CAKES & BARS
+  { id:10, name:"Fudgy Brownie",               cat:"cakes",      price:90,  emoji:"🟫", badge:"Bestseller", desc:"Dense, ultra-fudgy chocolate brownie with a crinkly top. Per slice." },
+  { id:11, name:"Blondie Bar",                 cat:"cakes",      price:85,  emoji:"🟨", badge:null,         desc:"Buttery brown sugar blondie studded with white chocolate chips. Per slice." },
+  { id:12, name:"S'mores Bar",                 cat:"cakes",      price:95,  emoji:"🍫", badge:"Popular",    desc:"Graham cracker base, chocolate ganache, and toasted marshmallow top. Per slice." },
+  { id:13, name:"Lemon Crumble Bar",           cat:"cakes",      price:90,  emoji:"🟡", badge:null,         desc:"Tangy lemon curd on a buttery shortbread base with crumble topping. Per slice." },
+
+  // SWEET DRINKS
+  { id:14, name:"Hot Chocolate",               cat:"drinks",     price:85,  emoji:"☕", badge:null,         desc:"Rich and creamy hot chocolate made with real melted dark chocolate." },
+  { id:15, name:"Chocolate Milk Shake",        cat:"drinks",     price:110, emoji:"🥤", badge:"Bestseller", desc:"Thick, velvety chocolate milkshake blended with premium ice cream." },
+  { id:16, name:"Iced Choco Latte",            cat:"drinks",     price:95,  emoji:"🧋", badge:null,         desc:"Chilled chocolate espresso latte over ice — sweet, rich, and refreshing." },
+];
+
+// ─────────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────────
+let cart = {};
+let selectedPayment  = '';
+let uploadedFileB64  = '';
+let uploadedFileName = '';
+
+// ─────────────────────────────────────────────────────────────────
+//  RENDER MENU
+// ─────────────────────────────────────────────────────────────────
+function renderMenu(filter = 'all') {
+  const container = document.getElementById('menuContainer');
+  const items = filter === 'all' ? MENU : MENU.filter(m => m.cat === filter);
+  const cats  = {};
+  items.forEach(m => { if (!cats[m.cat]) cats[m.cat] = []; cats[m.cat].push(m); });
+  const labels = { cookies:'Cookies', chocolates:'Chocolates', cakes:'Cakes & Bars', drinks:'Sweet Drinks' };
+  let html = '';
+  Object.keys(cats).forEach(cat => {
+    html += `<div class="section-label">${labels[cat] || cat}</div><div class="menu-grid">`;
+    cats[cat].forEach(item => {
+      const qty = cart[item.id] || 0;
+      html += `<div class="menu-card">
+        <div class="img-wrap">
+          ${item.badge ? `<div class="badge">${item.badge}</div>` : ''}
+          ${item.emoji}
+        </div>
+        <div class="info">
+          <h3>${item.name}</h3>
+          <p>${item.desc}</p>
+          <div class="row">
+            <span class="price">₱${item.price.toFixed(2)}</span>
+            ${qty === 0
+              ? `<button class="add-btn" onclick="addToCart(${item.id})">+</button>`
+              : `<div class="qty-control">
+                  <button onclick="changeQty(${item.id},-1)">−</button>
+                  <span>${qty}</span>
+                  <button onclick="changeQty(${item.id},1)">+</button>
+                </div>`}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function filterMenu(cat, btn) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMenu(cat);
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  CART
+// ─────────────────────────────────────────────────────────────────
+function addToCart(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  updateCart(); renderMenu(getActiveFilter());
+  showToast('Added to cart 🛒');
+}
+function changeQty(id, d) {
+  cart[id] = (cart[id] || 0) + d;
+  if (cart[id] <= 0) delete cart[id];
+  updateCart(); renderMenu(getActiveFilter());
+}
+function removeFromCart(id) {
+  delete cart[id];
+  updateCart(); renderMenu(getActiveFilter());
+}
+function getActiveFilter() {
+  const t = document.querySelector('.nav-tab.active')?.textContent.trim().toLowerCase() || 'all';
+  return ({all:'all','cookies':'cookies','chocolates':'chocolates','cakes & bars':'cakes','sweet drinks':'drinks'})[t] || 'all';
+}
+function getTotal() {
+  return Object.entries(cart).reduce((s,[id,q])=>{
+    const item=MENU.find(m=>m.id==id); return s+(item?item.price*q:0);
+  },0);
+}
+function updateCart() {
+  const count = Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cartCount').textContent    = count;
+  document.getElementById('cartSubtotal').textContent = `₱${getTotal().toFixed(2)}`;
+  renderCartItems();
+}
+function renderCartItems() {
+  const el  = document.getElementById('cartItems');
+  const ids = Object.keys(cart);
+  if (!ids.length) {
+    el.innerHTML = `<div class="empty-cart"><div class="icon">🍫</div><p>Your cart is empty.<br/>Add something sweet!</p></div>`;
+    return;
+  }
+  el.innerHTML = ids.map(id=>{
+    const item=MENU.find(m=>m.id==id), qty=cart[id];
+    return `<div class="cart-item">
+      <div class="cart-item-emoji">${item.emoji}</div>
+      <div class="cart-item-info"><h4>${item.name}</h4><span>₱${item.price.toFixed(2)} × ${qty}</span></div>
+      <div class="cart-item-price">₱${(item.price*qty).toFixed(2)}</div>
+      <button class="remove-item" onclick="removeFromCart(${id})">🗑</button>
+    </div>`;
+  }).join('');
+}
+function toggleCart() {
+  document.getElementById('cartPanel').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  CHECKOUT FLOW
+// ─────────────────────────────────────────────────────────────────
+function openCheckout() {
+  if (!Object.keys(cart).length) { showToast('Your cart is empty!'); return; }
+  document.getElementById('cartPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  goStep(1);
+}
+function closeCheckout() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeSuccess() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  cart={}; selectedPayment=''; uploadedFileB64=''; uploadedFileName='';
+  updateCart(); renderMenu(getActiveFilter());
+}
+
+function goStep(n) {
+  if (n===2) {
+    const name=document.getElementById('custName').value.trim();
+    const phone=document.getElementById('custPhone').value.trim();
+    const addr=document.getElementById('custAddress').value.trim();
+    if (!name||!phone||!addr) { showToast('Please fill in required fields'); return; }
+  }
+  if (n===3) {
+    if (!selectedPayment) { showToast('Please select a payment method'); return; }
+    if (selectedPayment!=='Cash on Delivery'&&!uploadedFileB64) { showToast('Please upload your payment screenshot'); return; }
+    buildReview();
+  }
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+  for (let i=1;i<=4;i++){
+    const d=document.getElementById(`dot${i}`); if(!d) continue;
+    d.classList.remove('active','done');
+    if(i<n) d.classList.add('done'); else if(i===n) d.classList.add('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  PAYMENT
+// ─────────────────────────────────────────────────────────────────
+function selectPayment(method) {
+  selectedPayment = method;
+  document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected'));
+  const map={'GCash':'pay-gcash','Maya':'pay-maya','Bank Transfer':'pay-bank','Cash on Delivery':'pay-cod'};
+  document.getElementById(map[method])?.classList.add('selected');
+  const info    = document.getElementById('paymentInfo');
+  const instr   = document.getElementById('payInstructions');
+  const ss      = document.getElementById('screenshotSection');
+  const nextBtn = document.getElementById('payNextBtn');
+  if (method==='Cash on Delivery') {
+    info.style.display='none'; ss.style.display='none'; nextBtn.disabled=false;
+  } else {
+    info.style.display='block'; ss.style.display='block';
+    nextBtn.disabled=!uploadedFileB64;
+    const txt={
+      'GCash':    `Send payment to GCash: <strong>${CONFIG.gcashNumber}</strong>`,
+      'Maya':     `Send payment to Maya: <strong>${CONFIG.mayaNumber}</strong>`,
+      'Bank Transfer': CONFIG.bankDetails
+    };
+    instr.innerHTML = txt[method] || '';
+  }
+}
+
+function handleFileUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  uploadedFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedFileB64 = e.target.result;
+    document.getElementById('filePreview').textContent = `✅ ${file.name} uploaded`;
+    document.getElementById('uploadZone').classList.add('has-file');
+    document.getElementById('payNextBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  REVIEW
+// ─────────────────────────────────────────────────────────────────
+function buildReview() {
+  const items = Object.entries(cart).map(([id,qty])=>{
+    const item=MENU.find(m=>m.id==id); return {...item,qty};
+  });
+  document.getElementById('reviewItems').innerHTML = items.map(i=>
+    `<div class="sum-item"><span>${i.emoji} ${i.name} × ${i.qty}</span><span>₱${(i.price*i.qty).toFixed(2)}</span></div>`
+  ).join('');
+  document.getElementById('reviewTotal').textContent = `₱${getTotal().toFixed(2)}`;
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const email=document.getElementById('custEmail').value.trim();
+  const addr=document.getElementById('custAddress').value.trim();
+  const notes=document.getElementById('custNotes').value.trim();
+  document.getElementById('reviewInfo').innerHTML=`
+    <strong>👤 ${name}</strong><br/>
+    📞 ${phone}${email?` &nbsp;•&nbsp; ✉️ ${email}`:''}<br/>
+    📍 ${addr}<br/>
+    💳 Payment: <strong>${selectedPayment}</strong>
+    ${notes?`<br/>📝 Notes: ${notes}`:''}`;
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  SUBMIT — calls the real backend
+// ─────────────────────────────────────────────────────────────────
+async function submitOrder() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending...';
+
+  const orderId = 'KN-' + Date.now().toString(36).toUpperCase();
+  const items   = Object.entries(cart).map(([id,qty])=>{
+    const item=MENU.find(m=>m.id==id);
+    return `${item.emoji} ${item.name} x${qty} = ₱${(item.price*qty).toFixed(2)}`;
+  });
+
+  const payload = {
+    orderId,
+    name:          document.getElementById('custName').value.trim(),
+    phone:         document.getElementById('custPhone').value.trim(),
+    email:         document.getElementById('custEmail').value.trim(),
+    address:       document.getElementById('custAddress').value.trim(),
+    notes:         document.getElementById('custNotes').value.trim(),
+    items:         items.join('\n'),
+    total:         `₱${getTotal().toFixed(2)}`,
+    paymentMethod: selectedPayment,
+    screenshot:    uploadedFileB64  || '',
+    screenshotName:uploadedFileName || '',
+    timestamp:     new Date().toLocaleString('en-PH',{timeZone:'Asia/Manila'})
+  };
+
+  try {
+    const res = await fetch(`${CONFIG.backendUrl}/api/order`, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-token':  CONFIG.apiToken
+      },
+      body: JSON.stringify(payload)
+    });
+
+    // Try to parse JSON, but don't crash if it fails
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+
+    // Accept 200 OR 207 (partial success — order saved even if email failed)
+    if (res.ok || res.status === 207) {
+      document.getElementById('orderIdDisplay').textContent = `Order ID: ${orderId}`;
+      document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+      document.getElementById('stepSuccess').classList.add('active');
+      document.querySelectorAll('.step-dot').forEach(d=>{d.classList.remove('active');d.classList.add('done');});
+    } else {
+      throw new Error(data.error || `Server returned ${res.status}`);
+    }
+
+  } catch(err) {
+    console.error('Order error:', err.message);
+    showToast('Something went wrong. Please try again.');
+    btn.disabled    = false;
+    btn.textContent = '✅ Place Order';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+// INIT
+renderMenu('all');
+updateCart();
+</script>
+</body>
+</html>
