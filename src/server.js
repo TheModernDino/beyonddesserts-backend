@@ -7,6 +7,10 @@ const orderRoute = require('./routes/order');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// ── TRUST PROXY — required for Render.com (sits behind a proxy) ──
+// This tells Express to trust the X-Forwarded-For header from Render
+app.set('trust proxy', 1);
+
 // ── CORS — only allow your frontend ─────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
