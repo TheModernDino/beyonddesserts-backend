@@ -16,18 +16,24 @@ function getAuthClient() {
   return auth;
 }
 
-// ── Ensure header row exists ──────────────────────────────────────
-async function ensureHeaders(sheets, spreadsheetId, sheetName) {
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${sheetName}!A1:K1`
-  });
+// ── Ensure "Orders" sheet tab exists, create it if not ───────────
+async function ensureSheet(sheets, spreadsheetId) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const existing = meta.data.sheets.map(s => s.properties.title);
 
-  const existingRow = response.data.values?.[0];
-  if (!existingRow || existingRow.length === 0) {
+  if (!existing.includes('Orders')) {
+    // Create the Orders tab
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: 'Orders' } } }]
+      }
+    });
+
+    // Add header row to the new tab
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `${sheetName}!A1`,
+      range: 'Orders!A1',
       valueInputOption: 'RAW',
       requestBody: {
         values: [[
@@ -45,15 +51,14 @@ async function logOrderToSheet(order) {
   const auth          = getAuthClient();
   const sheets        = google.sheets({ version: 'v4', auth });
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetName     = 'Orders';
 
-  // Make sure headers exist on first run
-  await ensureHeaders(sheets, spreadsheetId, sheetName);
+  // Make sure the Orders tab exists
+  await ensureSheet(sheets, spreadsheetId);
 
   // Append new order row
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range:            `${sheetName}!A:K`,
+    range:            'Orders!A:K',
     valueInputOption: 'RAW',
     insertDataOption: 'INSERT_ROWS',
     requestBody: {
