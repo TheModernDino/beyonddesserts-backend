@@ -33,7 +33,7 @@ function buildEmailHtml(order) {
 
     <!-- Header -->
     <div style="text-align:center;margin-bottom:28px;">
-      <h1 style="margin:0;font-size:2.2rem;color:#e8a020;">🍽 KainNa</h1>
+      <h1 style="margin:0;font-size:2.2rem;color:#e8a020;">🍽 BeyondDessert</h1>
       <p style="margin:6px 0 0;color:#8a8070;font-size:14px;">New order received!</p>
     </div>
 
@@ -75,7 +75,7 @@ function buildEmailHtml(order) {
     </div>
 
     <p style="text-align:center;color:#8a8070;font-size:12px;margin-top:24px;">
-      Automated notification from your KainNa ordering website.
+      Automated notification from your BeyondDessert ordering website.
     </p>
   </div>
   </body>
@@ -105,7 +105,7 @@ async function sendOrderEmail(order) {
   }
 
   const mailOptions = {
-    from:        `"KainNa Orders" <${process.env.GMAIL_USER}>`,
+    from:        `"BeyondDessert Orders" <${process.env.GMAIL_USER}>`,
     to:          process.env.OWNER_EMAIL,
     subject:     `🍽 New Order — ${order.orderId} (${order.total})`,
     html:        buildEmailHtml(order),
